@@ -1,0 +1,87 @@
+---
+- name: Pre-Deploy OpenStack
+  hosts: all
+  become: true
+
+  vars:
+    users:
+      - osadmin
+
+  tasks:
+
+    - name: Test if internet is reachable
+      shell: ping google.com -c 3
+
+    - name: Install base packages and dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      with_items:
+        - python-pip
+        - python-dev
+        - libffi-dev
+        - gcc
+        - build-essential
+        - libssl-dev
+        - openssl
+        - libxml2-dev
+        - zlib1g-dev
+        - libgmp-dev
+        - ntp
+        - sshpass
+
+
+
+
+#Deploy Lab admin user:
+    - name: Deploy Alternative User Accounts
+      user:
+        name: "{{ item }}"
+        skeleton: createhome
+        shell: /bin/bash
+        state: present
+        groups: sudo
+        append: true
+        with_items:
+          - "{{ users }}"
+
+    - name: Add Admin group
+      group:
+        name: admin
+        state: present
+
+
+    - name: Add Alternate User Accounts to password-less sudo
+      lineinfile:
+        regexp: "^%admin"
+        line: "%admin ALL=(ALL) NOPASSWD:ALL"
+        dest: /etc/sudoers
+
+
+    - name: Install PIP packages
+      pip:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - ansible
+        - kolla
+        - python-openstackclient
+        - python-neutronclient
+
+    - name: Create kolla_deploy directories
+      file:
+        path: /opt/kolla_deploy/kolla
+        state: directory
+
+    - name: Checkout Git Repo
+      git:
+        repo: https://git.openstack.org/openstack/kolla
+        dest: /opt/kolla_deploy/kolla
+
+
+    - name: Add user to 'Docker' group and assign passwordless sudo
+      user:
+        name: labadmin
+        groups: docker,admin
+        append: false
