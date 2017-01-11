@@ -31,9 +31,6 @@
         - ntp
         - sshpass
 
-
-
-
 #Deploy Lab admin user:
     - name: Deploy Alternative User Accounts
       user:
@@ -82,6 +79,8 @@
 
     - name: Add user to 'Docker' group and assign passwordless sudo
       user:
-        name: labadmin
+        name: "{{ item }}"
         groups: docker,admin
         append: false
+        with_items:
+          - "{{ users }}"
