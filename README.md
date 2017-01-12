@@ -8,3 +8,9 @@ The purpose of this repository is to provide a simple Ansible Playbook which hel
   - Testing simple things such as Internet connectivity and apt-repositories and reachability prior to running the `kolla-ansible deploy`
 
 _NOTE:_ This does not attempt to replace the `kolla-ansible bootstrap` function, but intended to run prior to the bootstrap process.  This is simply some helpful hacks I ran across while deploying OpenStack Kolla.  Enjoy!
+
+## How to Use:
+
+Simply run this playbook against your infrastructure like you would any other playbook.  Be sure to supply `user` parameters in the playbook itself if you plan on creating user accounts prior to the kolla-deployment
+
+`ansible-playbook kolla-predeployment.yml -i yourinventory.ini`
